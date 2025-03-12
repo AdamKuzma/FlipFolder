@@ -29,20 +29,33 @@
 		C8F767222D77A6B80060E9BE /* FlipFolder AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "FlipFolder AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		C8345D0E2D7FAA5B00BBD07A /* Exceptions for "FlipFolder" folder in "FlipFolder App" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = C8F767072D77A6B60060E9BE /* FlipFolder App */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		C8F7670A2D77A6B60060E9BE /* FlipFolder App */ = {
+		C8F7670A2D77A6B60060E9BE /* FlipFolder */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "FlipFolder App";
+			exceptions = (
+				C8345D0E2D7FAA5B00BBD07A /* Exceptions for "FlipFolder" folder in "FlipFolder App" target */,
+			);
+			path = FlipFolder;
 			sourceTree = "<group>";
 		};
-		C8F7671B2D77A6B80060E9BE /* FlipFolder AppTests */ = {
+		C8F7671B2D77A6B80060E9BE /* FlipFolder Tests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "FlipFolder AppTests";
+			path = "FlipFolder Tests";
 			sourceTree = "<group>";
 		};
-		C8F767252D77A6B80060E9BE /* FlipFolder AppUITests */ = {
+		C8F767252D77A6B80060E9BE /* FlipFolder UITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "FlipFolder AppUITests";
+			path = "FlipFolder UITests";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -75,9 +88,9 @@
 		C8F766FF2D77A6B60060E9BE = {
 			isa = PBXGroup;
 			children = (
-				C8F7670A2D77A6B60060E9BE /* FlipFolder App */,
-				C8F7671B2D77A6B80060E9BE /* FlipFolder AppTests */,
-				C8F767252D77A6B80060E9BE /* FlipFolder AppUITests */,
+				C8F7670A2D77A6B60060E9BE /* FlipFolder */,
+				C8F7671B2D77A6B80060E9BE /* FlipFolder Tests */,
+				C8F767252D77A6B80060E9BE /* FlipFolder UITests */,
 				C8F767092D77A6B60060E9BE /* Products */,
 			);
 			sourceTree = "<group>";
@@ -108,7 +121,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				C8F7670A2D77A6B60060E9BE /* FlipFolder App */,
+				C8F7670A2D77A6B60060E9BE /* FlipFolder */,
 			);
 			name = "FlipFolder App";
 			packageProductDependencies = (
@@ -131,7 +144,7 @@
 				C8F7671A2D77A6B80060E9BE /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				C8F7671B2D77A6B80060E9BE /* FlipFolder AppTests */,
+				C8F7671B2D77A6B80060E9BE /* FlipFolder Tests */,
 			);
 			name = "FlipFolder AppTests";
 			packageProductDependencies = (
@@ -154,7 +167,7 @@
 				C8F767242D77A6B80060E9BE /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				C8F767252D77A6B80060E9BE /* FlipFolder AppUITests */,
+				C8F767252D77A6B80060E9BE /* FlipFolder UITests */,
 			);
 			name = "FlipFolder AppUITests";
 			packageProductDependencies = (
@@ -186,7 +199,7 @@
 					};
 				};
 			};
-			buildConfigurationList = C8F767032D77A6B60060E9BE /* Build configuration list for PBXProject "FlipFolder App" */;
+			buildConfigurationList = C8F767032D77A6B60060E9BE /* Build configuration list for PBXProject "FlipFolder" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -395,7 +408,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"FlipFolder App/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"FlipFolder/Preview Content\"";
 				DEVELOPMENT_TEAM = LK8M3QQF58;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -409,7 +422,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "adamkuzma.FlipFolder-App";
+				PRODUCT_BUNDLE_IDENTIFIER = adamkuzma.FlipFolder;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -424,7 +437,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"FlipFolder App/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"FlipFolder/Preview Content\"";
 				DEVELOPMENT_TEAM = LK8M3QQF58;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -438,7 +451,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "adamkuzma.FlipFolder-App";
+				PRODUCT_BUNDLE_IDENTIFIER = adamkuzma.FlipFolder;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -521,7 +534,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		C8F767032D77A6B60060E9BE /* Build configuration list for PBXProject "FlipFolder App" */ = {
+		C8F767032D77A6B60060E9BE /* Build configuration list for PBXProject "FlipFolder" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C8F7672A2D77A6B80060E9BE /* Debug */,
