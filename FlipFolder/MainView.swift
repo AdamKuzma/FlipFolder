@@ -251,74 +251,129 @@ struct MainView: View {
     @Binding var isLoading: Bool
     @StateObject private var zoomManager = PDFZoomManager.shared
     @State private var currentZoom: CGFloat = 1.0
+    @Binding var isTopMenuVisible: Bool
+    @Binding var isAnnotationModeActive: Bool
+    @State private var showAnnotationSheet: Bool = false
     
     var body: some View {
         Group {
             if selectedSong != nil {
-                ZoomableScrollView(currentZoom: $currentZoom) {
-                    ZStack(alignment: .top) {
-                        // Content
-                        VStack(spacing: 0) {
-                            if isLoading {
-                                VStack(spacing: 0) {
-                                    LoadingPage()
-                                    LoadingPage()
+                ZStack(alignment: .bottom) {
+                    ZoomableScrollView(currentZoom: $currentZoom) {
+                        ZStack(alignment: .top) {
+                            // Content
+                            VStack(spacing: 0) {
+                                if isLoading {
+                                    VStack(spacing: 0) {
+                                        LoadingPage()
+                                        LoadingPage()
+                                    }
+                                } else {
+                                    PDFPageView(pageNumber: 1)
+                                        .frame(width: UIScreen.main.bounds.width, height: 500)
+                                        .transition(.asymmetric(
+                                            insertion: .offset(y: 10).combined(with: .opacity),
+                                            removal: .opacity
+                                        ))
+                                        .padding(.top, 25)
+                                    
+                                    PDFPageView(pageNumber: 2)
+                                        .frame(width: UIScreen.main.bounds.width, height: 500)
+                                        .transition(.asymmetric(
+                                            insertion: .offset(y: 10).combined(with: .opacity),
+                                            removal: .opacity
+                                        ))
                                 }
-                            } else {
-                                PDFPageView(pageNumber: 1)
-                                    .frame(width: UIScreen.main.bounds.width, height: 500)
-                                    .transition(.asymmetric(
-                                        insertion: .offset(y: 10).combined(with: .opacity),
-                                        removal: .opacity
-                                    ))
-                                    .padding(.top, 25)
-                                
-                                PDFPageView(pageNumber: 2)
-                                    .frame(width: UIScreen.main.bounds.width, height: 500)
-                                    .transition(.asymmetric(
-                                        insertion: .offset(y: 10).combined(with: .opacity),
-                                        removal: .opacity
-                                    ))
+                            }
+                            .animation(.easeOut(duration: 0.3), value: isLoading)
+                            
+                            // Title section overlay
+                            if let song = selectedSong, !isLoading {
+                                VStack(spacing: 8) {
+                                    Text(song.title)
+                                        .font(.custom("TiroBangla-Regular", size: 19))
+                                        .foregroundColor(Color(hex: "#1C1B1F"))
+                                        .frame(maxWidth: .infinity)
+                                    
+                                    Text(song.composer)
+                                        .font(.custom("TiroBangla-Italic", size: 7))
+                                        .fontDesign(.serif)
+                                        .italic()
+                                        .foregroundColor(Color(hex: "#1C1B1F"))
+                                        .kerning(-0.3)
+                                        .frame(maxWidth: .infinity, alignment: .trailing)
+                                }
+                                .padding(.horizontal, 25)
+                                .padding(.top, 40)
+                                .padding(.bottom, 20)
+                                .background(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [
+                                            Color.white,
+                                            Color.white.opacity(0)
+                                        ]),
+                                        startPoint: .top,
+                                        endPoint: .bottom
+                                    )
+                                    .frame(height: 120)
+                                )
+                                .transition(.asymmetric(
+                                    insertion: .opacity.combined(with: .offset(y: 5)),
+                                    removal: .opacity
+                                ))
                             }
                         }
-                        .animation(.easeOut(duration: 0.3), value: isLoading)
-                        
-                        // Title section overlay
-                        if let song = selectedSong, !isLoading {
-                            VStack(spacing: 8) {
-                                Text(song.title)
-                                    .font(.custom("TiroBangla-Regular", size: 19))
-                                    .foregroundColor(Color(hex: "#1C1B1F"))
-                                    .frame(maxWidth: .infinity)
-                                
-                                Text(song.composer)
-                                    .font(.custom("TiroBangla-Italic", size: 7))
-                                    .fontDesign(.serif)
-                                    .italic()
-                                    .foregroundColor(Color(hex: "#1C1B1F"))
-                                    .kerning(-0.3)
-                                    .frame(maxWidth: .infinity, alignment: .trailing)
+                        .padding(.top, 100)
+                        .frame(width: UIScreen.main.bounds.width)
+                    }
+                    .background(Color.white)
+                    .onAppear {
+                        // Initialize zoom from manager
+                        currentZoom = zoomManager.scale
+                    }
+                    .onDisappear {
+                        // Save zoom to manager
+                        zoomManager.scale = currentZoom
+                    }
+                    
+                    // Annotation Sheet
+                    if showAnnotationSheet {
+                        AnnotationSheet(isVisible: $isAnnotationModeActive, isTopMenuVisible: $isTopMenuVisible)
+                            .transition(.move(edge: .bottom))
+                    }
+                }
+                
+                // Add Annotation Top Menu overlay when in annotation mode
+                .overlay(
+                    VStack {
+                        if isAnnotationModeActive {
+                            AnnotationTopMenu(
+                                isAnnotationModeActive: $isAnnotationModeActive,
+                                isTopMenuVisible: $isTopMenuVisible
+                            )
+                                .frame(height: 80)
+                                .transition(.asymmetric(
+                                    insertion: .move(edge: .top).combined(with: .opacity),
+                                    removal: .move(edge: .top).combined(with: .opacity)
+                                ))
+                        }
+                        Spacer()
+                    }
+                )
+                .onChange(of: isAnnotationModeActive) { newValue in
+                    if newValue {
+                        // When annotation mode is activated, show the annotation sheet after a short delay
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                showAnnotationSheet = true
                             }
-                            .padding(.horizontal, 25)
-                            .padding(.top, 40)
-                            .padding(.bottom, 20)
-                            .transition(.asymmetric(
-                                insertion: .opacity.combined(with: .offset(y: 5)),
-                                removal: .opacity
-                            ))
+                        }
+                    } else {
+                        // When annotation mode is deactivated, hide the annotation sheet immediately
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            showAnnotationSheet = false
                         }
                     }
-                    .padding(.top, 100)
-                    .frame(width: UIScreen.main.bounds.width)
-                }
-                .background(Color.white)
-                .onAppear {
-                    // Initialize zoom from manager
-                    currentZoom = zoomManager.scale
-                }
-                .onDisappear {
-                    // Save zoom to manager
-                    zoomManager.scale = currentZoom
                 }
             } else {
                 VStack(alignment: .center, spacing: 12) {
@@ -347,7 +402,17 @@ struct MainView: View {
 
 #Preview {
     VStack(spacing: 20) {
-        MainView(selectedSong: .constant(nil), isLoading: .constant(false))
-        MainView(selectedSong: .constant(Song(title: "Preview Song", composer: "Preview Composer")), isLoading: .constant(false))
+        MainView(
+            selectedSong: .constant(nil), 
+            isLoading: .constant(false), 
+            isTopMenuVisible: .constant(true),
+            isAnnotationModeActive: .constant(false)
+        )
+        MainView(
+            selectedSong: .constant(Song(title: "Preview Song", composer: "Preview Composer")), 
+            isLoading: .constant(false), 
+            isTopMenuVisible: .constant(true),
+            isAnnotationModeActive: .constant(false)
+        )
     }
 }

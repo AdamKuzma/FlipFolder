@@ -2,14 +2,18 @@ import SwiftUI
 
 struct MenuItemRow: View {
     let item: ToolsMenuItem
+    @EnvironmentObject var appState: AppState
     
     var body: some View {
         Button(action: {
-            item.action()
+            // Only perform action if not disabled
+            if !isDisabled {
+                item.action()
+            }
         }) {
             HStack {
                 Text(item.title)
-                    .foregroundColor(Color(hex: "#212121"))
+                    .foregroundColor(isDisabled ? Color.gray : Color(hex: "#212121"))
                     .font(.system(size: 15, weight: .medium))
                     .kerning(-0.1)
                 Spacer()
@@ -18,12 +22,32 @@ struct MenuItemRow: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 18, height: 18)
-                    .foregroundColor(.primary)
+                    .foregroundColor(isDisabled ? Color.gray : .primary)
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 14)
+            .opacity(isDisabled ? 0.5 : 1.0)
         }
+        .disabled(isDisabled)
     }
+    
+    private var isDisabled: Bool {
+        // Disable annotation, crop, and rearrange if no song is selected
+        if appState.selectedSong == nil {
+            switch item {
+            case .annotate, .crop, .rearrange:
+                return true
+            default:
+                return false
+            }
+        }
+        return false
+    }
+}
+
+// AppState class to share state across views
+class AppState: ObservableObject {
+    @Published var selectedSong: Song?
 }
 
 enum ToolsMenuItem: CaseIterable, Identifiable {
@@ -65,7 +89,8 @@ enum ToolsMenuItem: CaseIterable, Identifiable {
         // Implement actions for each menu item
         switch self {
         case .annotate:
-            // Handle annotate action
+            // Post notification to show annotation tools
+            NotificationCenter.default.post(name: .showAnnotationTools, object: nil)
             break
         case .crop:
             // Handle crop action
@@ -139,4 +164,5 @@ struct PartItemRow: View {
 extension Notification.Name {
     static let showPartsMenu = Notification.Name("showPartsMenu")
     static let partSelected = Notification.Name("partSelected")
+    static let showAnnotationTools = Notification.Name("showAnnotationTools")
 } 

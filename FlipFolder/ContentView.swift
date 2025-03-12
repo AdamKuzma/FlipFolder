@@ -28,6 +28,10 @@ struct ContentView: View {
     @State private var selectedPart: InstrumentPart = .trumpets
     @State private var partToConfirm: InstrumentPart?
     @State private var showingPartConfirmation = false
+    @State private var isAnnotationModeActive = false
+    
+    // Create AppState to share with MenuItemRow
+    @StateObject private var appState = AppState()
     
     var body: some View {
         ZStack {
@@ -64,17 +68,33 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: .partSelected)) { notification in
             handlePartSelected(notification)
         }
+        .onReceive(NotificationCenter.default.publisher(for: .showAnnotationTools)) { _ in
+            handleShowAnnotationTools()
+        }
+        .environmentObject(appState)
+        .onChange(of: selectedSong) { newSong in
+            // Update AppState when selectedSong changes
+            appState.selectedSong = newSong
+        }
     }
     
     // MARK: - View Components
     
     private var mainContentView: some View {
         ZStack {
-            MainView(selectedSong: $selectedSong, isLoading: $isMainViewLoading)
+            MainView(
+                selectedSong: $selectedSong, 
+                isLoading: $isMainViewLoading, 
+                isTopMenuVisible: $isTopMenuVisible,
+                isAnnotationModeActive: $isAnnotationModeActive
+            )
                 .ignoresSafeArea(.keyboard, edges: .bottom)
                 .onTapGesture {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        isTopMenuVisible.toggle()
+                    // Only toggle top menu if not in annotation mode
+                    if !isAnnotationModeActive {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            isTopMenuVisible.toggle()
+                        }
                     }
                 }
                 .offset(x: showSongsView ? 12 : 0)
@@ -96,10 +116,13 @@ struct ContentView: View {
                         Spacer().frame(height: 8)
                     }
                     
-                    TopMenu(isScrimVisible: $isScrimVisible, showToolsMenu: $showToolsMenu, showSongsView: $showSongsView, statusState: $statusState)
-                        .offset(y: isTopMenuVisible ? 0 : -10)
-                        .opacity(isTopMenuVisible ? 1 : 0)
-                        .animation(.easeInOut(duration: 0.2), value: isTopMenuVisible)
+                    // Only show the regular TopMenu when not in annotation mode
+                    if !isAnnotationModeActive {
+                        TopMenu(isScrimVisible: $isScrimVisible, showToolsMenu: $showToolsMenu, showSongsView: $showSongsView, statusState: $statusState)
+                            .offset(y: isTopMenuVisible ? 0 : -10)
+                            .opacity(isTopMenuVisible ? 1 : 0)
+                            .animation(.easeInOut(duration: 0.2), value: isTopMenuVisible)
+                    }
                 }
             }
             .frame(height: 80)
@@ -423,6 +446,29 @@ struct ContentView: View {
                     // Restore the previous state
                     statusState = previousState
                 }
+            }
+        }
+    }
+    
+    private func handleShowAnnotationTools() {
+        // Only activate annotation mode if a song is selected
+        guard selectedSong != nil else { return }
+        
+        // Hide the tools menu
+        withAnimation(.easeInOut(duration: 0.2)) {
+            showToolsMenu = false
+            toolsMenuScale = 0.6
+        }
+        
+        // First, hide the top menu
+        withAnimation(.easeInOut(duration: 0.2)) {
+            isTopMenuVisible = false
+        }
+        
+        // After the top menu is hidden, activate annotation mode
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                isAnnotationModeActive = true
             }
         }
     }
