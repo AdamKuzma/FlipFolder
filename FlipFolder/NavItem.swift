@@ -17,7 +17,7 @@ struct NavItem: View {
         Image(imageName)
             .resizable()
             .scaledToFit()
-            .frame(width: 20, height: 20)
+            .frame(width: 18, height: 18)
             .padding(6)
             .background(.ultraThinMaterial)
             .cornerRadius(8)

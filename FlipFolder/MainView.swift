@@ -41,6 +41,7 @@ struct ZoomableScrollView<Content: View>: UIViewRepresentable {
         scrollView.showsHorizontalScrollIndicator = false
         scrollView.bouncesZoom = true
         scrollView.backgroundColor = .white
+        scrollView.contentInsetAdjustmentBehavior = .never // Prevent safe area adjustments
         
         // Create a UIHostingController to host our SwiftUI content
         let hostedView = context.coordinator.hostingController.view!
@@ -57,8 +58,8 @@ struct ZoomableScrollView<Content: View>: UIViewRepresentable {
             hostedView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
             hostedView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
             
-            // This ensures the content is at least as wide as the scroll view
-            hostedView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor)
+            // This ensures the content width matches the scroll view width
+            hostedView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor, multiplier: 1.0)
         ])
         
         // Add double tap gesture for quick zoom
@@ -162,15 +163,13 @@ struct PDFPageView: UIViewRepresentable {
     
     func makeUIView(context: Context) -> PDFView {
         let pdfView = PDFView()
-        pdfView.autoScales = true
+        pdfView.autoScales = false // Disable auto scaling to handle it manually
         pdfView.displayMode = .singlePage
         pdfView.displayDirection = .vertical
         pdfView.backgroundColor = .white
         pdfView.pageShadowsEnabled = false
         
-        // Disable individual page zooming and interaction
-        pdfView.minScaleFactor = pdfView.scaleFactorForSizeToFit
-        pdfView.maxScaleFactor = pdfView.scaleFactorForSizeToFit
+        // Only allow interaction from parent scroll view
         pdfView.isUserInteractionEnabled = false
         
         // Try to load PDF directly from the Resources folder
@@ -197,12 +196,24 @@ struct PDFPageView: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: PDFView, context: Context) {
-        uiView.pageShadowsEnabled = false
-        
-        // Ensure zoom is disabled
-        uiView.minScaleFactor = uiView.scaleFactorForSizeToFit
-        uiView.maxScaleFactor = uiView.scaleFactorForSizeToFit
-        uiView.isUserInteractionEnabled = false
+        // Ensure PDF takes full width of container
+        DispatchQueue.main.async {
+            // Get the available width
+            let availableWidth = uiView.bounds.width
+            
+            // Calculate the scale to fit width exactly
+            if let pdfPage = uiView.document?.page(at: 0) {
+                let pageSize = pdfPage.bounds(for: .mediaBox).size
+                let widthScale = availableWidth / pageSize.width
+                
+                // Apply the width-based scale
+                uiView.scaleFactor = widthScale
+                
+                // Update layout
+                uiView.layoutDocumentView()
+                
+            }
+        }
     }
 }
 
@@ -254,6 +265,15 @@ struct MainView: View {
     @Binding var isTopMenuVisible: Bool
     @Binding var isAnnotationModeActive: Bool
     @State private var showAnnotationSheet: Bool = false
+    @State private var currentPage: Int = 0
+    @State private var totalPages: Int = 3 // Updated to 3 pages
+    @State private var orientation = UIDevice.current.orientation
+    
+    // Computed property to check if device is in landscape
+    var isLandscape: Bool {
+        return orientation.isLandscape || 
+            UIScreen.main.bounds.width > UIScreen.main.bounds.height
+    }
     
     var body: some View {
         Group {
@@ -267,22 +287,64 @@ struct MainView: View {
                                     VStack(spacing: 0) {
                                         LoadingPage()
                                         LoadingPage()
+                                        LoadingPage() // Added third loading page
                                     }
                                 } else {
-                                    PDFPageView(pageNumber: 1)
-                                        .frame(width: UIScreen.main.bounds.width, height: 500)
-                                        .transition(.asymmetric(
-                                            insertion: .offset(y: 10).combined(with: .opacity),
-                                            removal: .opacity
-                                        ))
-                                        .padding(.top, 25)
+                                    // Add a spacer at the top to push content below status bar
+                                    Spacer().frame(height: {
+                                        // Get safe area insets in a safe way
+                                        let scenes = UIApplication.shared.connectedScenes
+                                        let windowScene = scenes.first as? UIWindowScene
+                                        return windowScene?.windows.first?.safeAreaInsets.top ?? 0
+                                    }())
                                     
-                                    PDFPageView(pageNumber: 2)
-                                        .frame(width: UIScreen.main.bounds.width, height: 500)
-                                        .transition(.asymmetric(
-                                            insertion: .offset(y: 10).combined(with: .opacity),
-                                            removal: .opacity
-                                        ))
+                                    GeometryReader { geometry in
+                                        VStack(spacing: 0) {
+                                            PDFPageView(pageNumber: 1)
+                                                .frame(
+                                                    width: geometry.size.width - (isLandscape ? 40 : 40), 
+                                                    height: 500
+                                                ) 
+                                                .transition(.asymmetric(
+                                                    insertion: .offset(y: 10).combined(with: .opacity),
+                                                    removal: .opacity
+                                                ))
+                                                .padding(.bottom, isLandscape ? -30 : -30) 
+                                                .padding(.top, isLandscape ? 120 : 0)
+                                                .id("page0") // Tag for tracking visible page
+                                                .onAppear { currentPage = 0 }
+                                                
+                                            PDFPageView(pageNumber: 2)
+                                                .frame(
+                                                    width: geometry.size.width - (isLandscape ? 40 : 40), 
+                                                    height: 500
+                                                )
+                                                .transition(.asymmetric(
+                                                    insertion: .offset(y: 10).combined(with: .opacity),
+                                                    removal: .opacity
+                                                ))
+                                                .padding(.bottom, -30) // Add negative bottom padding to reduce space
+                                                .id("page1") // Tag for tracking visible page
+                                                .onAppear { currentPage = 1 }
+                                                
+                                            PDFPageView(pageNumber: 3)
+                                                .frame(
+                                                    width: geometry.size.width - (isLandscape ? 40 : 40), 
+                                                    height: 500
+                                                )
+                                                .transition(.asymmetric(
+                                                    insertion: .offset(y: 10).combined(with: .opacity),
+                                                    removal: .opacity
+                                                ))
+                                                .id("page2") // Tag for tracking visible page
+                                                .onAppear { currentPage = 2 }
+                                        }
+                                        .frame(width: geometry.size.width) // Make sure VStack takes full width
+                                        .padding(.horizontal, isLandscape ? 10 : -6) // Different padding for landscape/portrait
+                                        .id("pdf-container-\(isLandscape)") // Force redraw on orientation change
+                                    }
+                                    .id("geometry-\(isLandscape)") // Force redraw on orientation change
+                                    .frame(maxWidth: .infinity) // Ensure GeometryReader takes full width
                                 }
                             }
                             .animation(.easeOut(duration: 0.3), value: isLoading)
@@ -290,6 +352,14 @@ struct MainView: View {
                             // Title section overlay
                             if let song = selectedSong, !isLoading {
                                 VStack(spacing: 8) {
+                                    // Add a spacer to respect safe area at the top
+                                    Spacer().frame(height: {
+                                        // Get safe area insets in a safe way
+                                        let scenes = UIApplication.shared.connectedScenes
+                                        let windowScene = scenes.first as? UIWindowScene
+                                        return windowScene?.windows.first?.safeAreaInsets.top ?? 0
+                                    }())
+                                    
                                     Text(song.title)
                                         .font(.custom("TiroBangla-Regular", size: 19))
                                         .foregroundColor(Color(hex: "#1C1B1F"))
@@ -304,8 +374,8 @@ struct MainView: View {
                                         .frame(maxWidth: .infinity, alignment: .trailing)
                                 }
                                 .padding(.horizontal, 25)
-                                .padding(.top, 40)
-                                .padding(.bottom, 20)
+                                .padding(.top, 0) // Remove top padding since we use the spacer
+                                .padding(.bottom, 0)
                                 .background(
                                     LinearGradient(
                                         gradient: Gradient(colors: [
@@ -323,10 +393,11 @@ struct MainView: View {
                                 ))
                             }
                         }
-                        .padding(.top, 100)
-                        .frame(width: UIScreen.main.bounds.width)
+                        .padding(.top, 50) // Add padding on top to avoid overlapping with status indicator
+                        .frame(maxWidth: .infinity)
                     }
                     .background(Color.white)
+                    .ignoresSafeArea(.all)
                     .onAppear {
                         // Initialize zoom from manager
                         currentZoom = zoomManager.scale
@@ -336,10 +407,37 @@ struct MainView: View {
                         zoomManager.scale = currentZoom
                     }
                     
+                    // Page Navigator at the bottom
+                    if !isLoading && !isAnnotationModeActive {
+                        VStack {
+                            Spacer()
+                            
+                            HStack {
+                                Spacer()
+                                PageNavigator(currentPage: currentPage, totalPages: totalPages)
+                                Spacer()
+                            }
+                            .padding(.bottom, {
+                                let scenes = UIApplication.shared.connectedScenes
+                                let windowScene = scenes.first as? UIWindowScene
+                                return (windowScene?.windows.first?.safeAreaInsets.bottom ?? 0) + 6
+                            }())
+                            .opacity(isTopMenuVisible ? 1 : 0)
+                            .offset(y: isTopMenuVisible ? 0 : 20) // Move down when hidden
+                            .animation(.easeInOut(duration: 0.2), value: isTopMenuVisible)
+                        }
+                        .ignoresSafeArea(.keyboard)
+                        .zIndex(30) // Make sure it appears above other elements
+                    }
+                    
                     // Annotation Sheet
                     if showAnnotationSheet {
-                        AnnotationSheet(isVisible: $isAnnotationModeActive, isTopMenuVisible: $isTopMenuVisible)
-                            .transition(.move(edge: .bottom))
+                        ZStack {
+                            AnnotationSheet(isVisible: $isAnnotationModeActive, isTopMenuVisible: $isTopMenuVisible)
+                                .transition(.move(edge: .bottom))
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                        .ignoresSafeArea()
                     }
                 }
                 
@@ -360,6 +458,73 @@ struct MainView: View {
                         Spacer()
                     }
                 )
+                // Add top edge gradient overlay
+                .overlay(
+                    VStack {
+                        // Top gradient overlay that fades the music sheets with blur
+                        ZStack {
+                            // Gradient background
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    Color.white,
+                                    Color.white.opacity(0)
+                                ]),
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                            
+                            // Progressive blur overlay
+                            VStack(spacing: 0) {
+                                ForEach(0..<8) { index in
+                                    Color.white
+                                        .opacity(0.2 - (Double(index) * 0.025))
+                                        .blur(radius: 6.0 - (Double(index) * 0.6))
+                                        .frame(height: 10)
+                                }
+                            }
+                        }
+                        .frame(height: 80)
+                        .allowsHitTesting(false) // Allow taps to pass through
+                        
+                        Spacer()
+                    }
+                    .ignoresSafeArea(.all, edges: .top),
+                    alignment: .top
+                )
+                // Add bottom edge gradient overlay
+                .overlay(
+                    VStack {
+                        Spacer()
+                        
+                        // Bottom gradient overlay that fades the music sheets with blur
+                        ZStack {
+                            // Gradient background
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    Color.white.opacity(0),
+                                    Color.white
+                                ]),
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                            
+                            // Progressive blur overlay
+                            VStack(spacing: 0) {
+                                ForEach(0..<8) { index in
+                                    Color.white
+                                        .opacity(0.025 + (Double(index) * 0.025))
+                                        .blur(radius: 0.6 + (Double(index) * 0.6))
+                                        .frame(height: 10)
+                                }
+                            }
+                        }
+                        .frame(height: 80)
+                        .allowsHitTesting(false) // Allow taps to pass through
+                    }
+                    .ignoresSafeArea(.all, edges: .bottom),
+                    alignment: .bottom
+                )
+                .ignoresSafeArea(.all)
                 .onChange(of: isAnnotationModeActive) { newValue in
                     if newValue {
                         // When annotation mode is activated, show the annotation sheet after a short delay
@@ -373,6 +538,15 @@ struct MainView: View {
                         withAnimation(.easeInOut(duration: 0.3)) {
                             showAnnotationSheet = false
                         }
+                    }
+                }
+                .onReceive(NotificationCenter.default.publisher(for: UIDevice.orientationDidChangeNotification)) { _ in
+                    self.orientation = UIDevice.current.orientation
+                    
+                    // Force layout refresh after a short delay
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        // This state change will force a redraw
+                        self.currentZoom = self.zoomManager.scale
                     }
                 }
             } else {
@@ -394,7 +568,7 @@ struct MainView: View {
                 .padding(.horizontal, 46)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(Color.white)
-                .ignoresSafeArea(.keyboard, edges: .bottom)
+                .ignoresSafeArea(.all)
             }
         }
     }

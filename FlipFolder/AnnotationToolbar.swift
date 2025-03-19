@@ -14,46 +14,65 @@ struct AnnotationSheet: View {
     @State private var selectedColor: Color = .black
     
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(alignment: .center, spacing: 0) {
             // Handle indicator
             RoundedRectangle(cornerRadius: 2.5)
                 .fill(Color.gray.opacity(0.5))
-                .frame(width: 30, height: 5)
-                .padding(.top, 8)
+                .frame(width: 48, height: 4)
+                .padding(.top, 12)
+                .padding(.bottom, 32)
             
-            // Annotation tools in new layout
+            // Annotation tools layout
             HStack {
                 // Left side - Undo/Redo/Clear
-                HStack(spacing: 4) {
+                HStack(spacing: 2) {
                     AnnotationTool(icon: "arrow.uturn.backward", label: "Undo")
                     AnnotationTool(icon: "arrow.uturn.forward", label: "Redo")
-                    AnnotationTool(icon: "trash", label: "Clear")
+                    AnnotationTool(icon: "trash", label: "Clear All")
                 }
                 
-                Spacer()
+                Spacer(minLength: 20)
                 
-                // Right - Drawing tools
-                HStack(spacing: 4) {
+                // Right side - Drawing tools and color
+                HStack(spacing: 2) {
                     AnnotationTool(icon: "pencil", label: "Draw")
                     AnnotationTool(icon: "text.cursor", label: "Text")
                     AnnotationTool(icon: "eraser", label: "Erase")
                     ColorOption(color: selectedColor)
-                    .frame(width: 36, height: 36)
-                    .onTapGesture {
-                        // Here you would show a color picker
-                    }
-                }  
+                        .frame(width: 30, height: 30)
+                        .onTapGesture {
+                            // Here you would show a color picker
+                        }
+                }
             }
-            .padding(.horizontal, 2)
-            .padding(.vertical, 16)
+            .padding(.horizontal, 25)
+            .padding(.bottom, 0)
+            
+            Spacer()
         }
-        .padding(.horizontal, 16)
+        .frame(height: 150) // Fixed height
         .background(
-            RoundedRectangle(cornerRadius: 16)
+            // Use a custom shape to only round the top corners
+            RoundedCorner(radius: 16, corners: [.topLeft, .topRight])
                 .fill(Color.white)
                 .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: -5)
         )
-        .frame(maxWidth: .infinity)
+        .edgesIgnoringSafeArea(.bottom)
+    }
+}
+
+// Custom shape to round specific corners
+struct RoundedCorner: Shape {
+    var radius: CGFloat
+    var corners: UIRectCorner
+    
+    func path(in rect: CGRect) -> Path {
+        let path = UIBezierPath(
+            roundedRect: rect,
+            byRoundingCorners: corners,
+            cornerRadii: CGSize(width: radius, height: radius)
+        )
+        return Path(path.cgPath)
     }
 }
 
@@ -67,9 +86,12 @@ struct AnnotationTool: View {
             Image(systemName: icon)
                 .font(.system(size: 22))
                 .foregroundColor(.black)
-                .frame(width: 42, height: 42)
-                //.background(Color.gray.opacity(0.1))
+                .frame(width: 44, height: 44)
                 .cornerRadius(8)
+            
+//            Text(label)
+//                .font(.caption)
+//                .foregroundColor(.black)
         }
     }
 }

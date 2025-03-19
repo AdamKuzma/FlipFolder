@@ -88,6 +88,7 @@ struct SongList: View {
     @Binding var isLoading: Bool
     @State private var songToConfirm: Song?
     @State private var showingSongConfirmation = false
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         ScrollView {
@@ -143,7 +144,15 @@ struct SongList: View {
         ) {
             Button("Yes") {
                 if let song = songToConfirm {
+                    let wasNoSong = selectedSong == nil
                     selectedSong = song
+                    
+                    // Dismiss only if we're changing from no song to a song
+                    if wasNoSong {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            dismiss()
+                        }
+                    }
                 }
             }
             Button("Cancel", role: .cancel) {}
@@ -162,6 +171,7 @@ struct PerformanceView: View {
     @Binding var statusState: StatusIndicatorState
     @Binding var selectedSong: Song?
     @Binding var mainViewLoading: Bool
+    @EnvironmentObject var appState: AppState
     
     var body: some View {
         VStack(spacing: 25) {
@@ -263,6 +273,7 @@ struct PerformanceView: View {
                 // Content based on selected tab
                 if selectedTab == 0 {
                     SongList(selectedSong: $selectedSong, isLoading: $isLoading)
+                        .environmentObject(appState)
                 } else {
                     VStack(alignment: .center, spacing: 12) {
                         Image("Empty")
@@ -286,6 +297,9 @@ struct PerformanceView: View {
         .background(Color(red: 251/255, green: 251/255, blue: 254/255))
         .onChange(of: selectedSong) { oldSong, newSong in
             guard !isEndingPerformance else { return }
+            
+            // Update appState with the new song
+            appState.selectedSong = newSong
             
             if let newSong = newSong {
                 isLoading = true
@@ -329,6 +343,7 @@ struct PerformanceRow: View {
     var label: String
     var value: String
     var icon: String?
+    @EnvironmentObject var appState: AppState
     
     var body: some View {
         HStack {
@@ -339,7 +354,13 @@ struct PerformanceRow: View {
             
             HStack(spacing: 12) {
                 if label == "Performance" {
-                    PulsatingDot()
+                    if appState.selectedSong != nil {
+                        // Show pulsating purple dot when a song is selected
+                        PulsatingDot()
+                    } else {
+                        // Show static gray dot when no song is selected
+                        StaticDot()
+                    }
                 }
                 
                 if let icon = icon {
@@ -363,4 +384,5 @@ struct PerformanceRow: View {
 
 #Preview {
     PerformanceView(performanceName: "Spring Concert", statusState: .constant(.noSong), selectedSong: .constant(nil), mainViewLoading: .constant(false))
+        .environmentObject(AppState())
 }

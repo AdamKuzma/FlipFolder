@@ -42,9 +42,21 @@ struct PulsatingDot: View {
     }
 }
 
+// Simple static dot without animation
+struct StaticDot: View {
+    var color: Color = .gray
+    
+    var body: some View {
+        Circle()
+            .fill(color)
+            .frame(width: 7, height: 7)
+    }
+}
+
 #Preview {
     VStack(spacing: 20) {
         PulsatingDot() // Using custom purple
+        StaticDot() // Using default gray
     }
     .padding(50)
     .background(Color.white)

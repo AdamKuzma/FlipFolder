@@ -10,11 +10,19 @@ struct SongsView: View {
     @State private var songToConfirm: Song?
     @State private var showingSongConfirmation = false
     
+    // Performance name from ContentView
+    @Binding var currentPerformanceName: String?
+    
     // Check if a performance is active
     private var isPerformanceActive: Bool {
         if case .performanceNoSong = statusState { return true }
         if case .performanceWithSong = statusState { return true }
         return false
+    }
+    
+    // Check if we have a performance name but haven't started the performance yet
+    private var isPendingPerformance: Bool {
+        return currentPerformanceName != nil && !isPerformanceActive
     }
     
     var body: some View {
@@ -172,7 +180,7 @@ struct SongsView: View {
                     selectedSong = song
                     isMainViewLoading = true
                     
-                    // Update status based on whether performance is active
+                    // Update status based on whether performance is active or pending
                     if isPerformanceActive {
                         // If performance is active, update to loading then performance with song
                         withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
@@ -191,6 +199,19 @@ struct SongsView: View {
                                 withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                                     statusState = .performanceWithSong(songTitle: song.title, composer: song.composer)
                                 }
+                            }
+                            isMainViewLoading = false
+                        }
+                    } else if isPendingPerformance {
+                        // If we have a performance name but haven't started the performance yet
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                            statusState = .loading(songTitle: song.title)
+                        }
+                        
+                        // After a delay, update to performanceWithSong state and clear loading
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                                statusState = .performanceWithSong(songTitle: song.title, composer: song.composer)
                             }
                             isMainViewLoading = false
                         }
@@ -247,5 +268,5 @@ struct SearchBar: View {
 }
 
 #Preview {
-    SongsView(selectedSong: .constant(nil), isMainViewLoading: .constant(false), showSongsView: .constant(true), statusState: .constant(.performanceNoSong))
+    SongsView(selectedSong: .constant(nil), isMainViewLoading: .constant(false), showSongsView: .constant(true), statusState: .constant(.performanceNoSong), currentPerformanceName: .constant(nil))
 } 

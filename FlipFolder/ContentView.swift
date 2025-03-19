@@ -88,7 +88,7 @@ struct ContentView: View {
                 isTopMenuVisible: $isTopMenuVisible,
                 isAnnotationModeActive: $isAnnotationModeActive
             )
-                .ignoresSafeArea(.keyboard, edges: .bottom)
+                .ignoresSafeArea()
                 .onTapGesture {
                     // Only toggle top menu if not in annotation mode
                     if !isAnnotationModeActive {
@@ -135,7 +135,13 @@ struct ContentView: View {
     }
     
     private var songsView: some View {
-        SongsView(selectedSong: $selectedSong, isMainViewLoading: $isMainViewLoading, showSongsView: $showSongsView, statusState: $statusState)
+        SongsView(
+            selectedSong: $selectedSong, 
+            isMainViewLoading: $isMainViewLoading, 
+            showSongsView: $showSongsView, 
+            statusState: $statusState,
+            currentPerformanceName: $currentPerformanceName
+        )
             .offset(x: showSongsView ? 0 : -12)
             .opacity(showSongsView ? 1 : 0)
             .animation(.easeInOut(duration: 0.2), value: showSongsView)
@@ -171,12 +177,12 @@ struct ContentView: View {
                         
                         Spacer()
                     }
-                    .frame(width: 280)
+                    .frame(width: 308)
                     .padding(.vertical, 20)
                     .padding(.horizontal, 22)
                     .background(Color.white.opacity(0.9))
                     .cornerRadius(12)
-                    .offset(y: statusState.label == "Performance Active" ? 72 : 60)
+                    .offset(y: statusState.label == "Performance Active" ? 72 : 64)
                     .scaleEffect(popoverScale)
                     .onAppear {
                         withAnimation(.spring(response: 0.2, dampingFraction: 0.7)) {
@@ -298,7 +304,7 @@ struct ContentView: View {
                 performanceName = ""
             }
             
-            Button("Start") {
+            Button("Create") {
                 startPerformance()
             }
             .disabled(performanceName.isEmpty)
@@ -326,6 +332,7 @@ struct ContentView: View {
                     selectedSong: $selectedSong,
                     mainViewLoading: $isMainViewLoading
                 )
+                .environmentObject(appState)
             }
         }
     }
@@ -351,16 +358,12 @@ struct ContentView: View {
             isScrimVisible = false
             isPerformanceSheetPresented = true
             performanceName = ""
-            if let song = selectedSong {
-                statusState = .performanceWithSong(songTitle: song.title, composer: song.composer)
-            } else {
-                statusState = .performanceNoSong
-            }
+            // Don't set the statusState yet - will be set when a song is selected
         }
     }
     
     private func handlePerformanceSheetDismiss() {
-        // When sheet is dismissed, check if a new performance was started
+        // When sheet is dismissed, only update status if a song is selected
         if let song = selectedSong, statusState != .performanceWithSong(songTitle: song.title, composer: song.composer) {
             // Only show loading if a song was changed or selected for the first time
             isMainViewLoading = true
@@ -376,6 +379,13 @@ struct ContentView: View {
                 }
             }
         }
+    }
+    
+    // Helper property to check if a performance is active
+    private var isPerformanceActive: Bool {
+        if case .performanceNoSong = statusState { return true }
+        if case .performanceWithSong = statusState { return true }
+        return false
     }
     
     private func handleShowPartsMenu() {
