@@ -14,8 +14,8 @@ struct MenuItemRow: View {
             HStack {
                 Text(item.title)
                     .foregroundColor(isDisabled ? Color.gray : Color(hex: "#212121"))
-                    .font(.system(size: 15, weight: .medium))
-                    .kerning(-0.1)
+                    .font(.system(size: 17))
+                    .kerning(0)
                 Spacer()
                 
                 Image(item.iconName)
@@ -142,8 +142,8 @@ struct PartItemRow: View {
             HStack {
                 Text(part.rawValue)
                     .foregroundColor(Color(hex: "#212121"))
-                    .font(.system(size: 15, weight: .medium))
-                    .kerning(-0.1)
+                    .font(.system(size: 17))
+                    .kerning(0)
                 Spacer()
                 
                 if part == selectedPart {

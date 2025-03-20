@@ -47,6 +47,7 @@ struct ContentView: View {
             // Tools and Parts Menus with shared scrim
             menuOverlays
         }
+        .ignoresSafeArea(.keyboard)
         .alert("Performance Name", isPresented: $showingPerformanceNameAlert) {
             performanceNameAlert
         }
@@ -88,7 +89,6 @@ struct ContentView: View {
                 isTopMenuVisible: $isTopMenuVisible,
                 isAnnotationModeActive: $isAnnotationModeActive
             )
-                .ignoresSafeArea()
                 .onTapGesture {
                     // Only toggle top menu if not in annotation mode
                     if !isAnnotationModeActive {
@@ -109,13 +109,7 @@ struct ContentView: View {
     private var topMenuOverlay: some View {
         VStack {
             GeometryReader { geometry in
-                let isLandscape = geometry.size.width > geometry.size.height
-                
                 VStack(spacing: 0) {
-                    if isLandscape {
-                        Spacer().frame(height: 8)
-                    }
-                    
                     // Only show the regular TopMenu when not in annotation mode
                     if !isAnnotationModeActive {
                         TopMenu(isScrimVisible: $isScrimVisible, showToolsMenu: $showToolsMenu, showSongsView: $showSongsView, statusState: $statusState)
@@ -125,13 +119,7 @@ struct ContentView: View {
                     }
                 }
             }
-            .frame(height: 80)
-            
-            Spacer()
         }
-        .offset(x: showSongsView ? 12 : 0)
-        .opacity(showSongsView ? 0 : 1)
-        .animation(.easeInOut(duration: 0.2), value: showSongsView)
     }
     
     private var songsView: some View {
@@ -234,15 +222,14 @@ struct ContentView: View {
                     VStack(spacing: 0) {
                         ForEach(ToolsMenuItem.allCases) { item in
                             MenuItemRow(item: item)
+                                .padding(.horizontal, 4)
                             if item != ToolsMenuItem.allCases.last {
                                 Divider()
-                                    .padding(.horizontal)
                             }
                         }
                     }
                     .frame(width: 225)
-                    .padding(.horizontal, 4)
-                    .padding(.vertical, 6)
+                    .padding(.vertical, 2)
                     .background(Color.white.opacity(0.6))
                     .background(.ultraThinMaterial)
                     .cornerRadius(12)
@@ -271,15 +258,14 @@ struct ContentView: View {
                     VStack(spacing: 0) {
                         ForEach(InstrumentPart.allCases) { part in
                             PartItemRow(part: part, selectedPart: selectedPart)
+                                .padding(.horizontal, 4)
                             if part != InstrumentPart.allCases.last {
                                 Divider()
-                                    .padding(.horizontal)
                             }
                         }
                     }
                     .frame(width: 225)
-                    .padding(.horizontal, 4)
-                    .padding(.vertical, 6)
+                    .padding(.vertical, 2)
                     .background(Color.white.opacity(0.6))
                     .background(.ultraThinMaterial)
                     .cornerRadius(12)

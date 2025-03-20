@@ -16,14 +16,12 @@ struct TopMenu: View {
     
     var body: some View {
         GeometryReader { geometry in
-            let isLandscape = geometry.size.width > geometry.size.height
-            
             HStack(alignment: .top, spacing: 5) {
                 NavItem(imageName: "Music", showToolsMenu: $showToolsMenu, showSongsView: $showSongsView)
                 
                 Spacer()
                 
-                StatusIndicator(state: statusState, isLandscape: isLandscape)
+                StatusIndicator(state: statusState)
                     .onTapGesture {
                         withAnimation(.easeInOut(duration: 0.2)) {
                             isScrimVisible = true
@@ -35,7 +33,7 @@ struct TopMenu: View {
                 NavItem(imageName: "Tools", showToolsMenu: $showToolsMenu, showSongsView: $showSongsView)
             }
             .padding(.horizontal, 25)
-            .padding(.vertical, 12)
+            .padding(.top, 20)
             .frame(maxWidth: .infinity)
             .background(Color.clear)
         }

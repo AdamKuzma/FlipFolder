@@ -77,7 +77,6 @@ enum StatusIndicatorState: Equatable {
 struct StatusIndicator: View {
     let state: StatusIndicatorState
     @State private var isPressed = false
-    var isLandscape: Bool = false
     
     private var isPerformanceActive: Bool {
         switch state {
@@ -157,15 +156,14 @@ struct StatusIndicator: View {
             }
             .animation(.spring(response: 0.4, dampingFraction: 0.8), value: state)
             
-            if state.label != nil && !isLandscape {
+            if state.label != nil {
                 Spacer()
             }
         }
-        .frame(width: isLandscape ? nil : (state.label != nil ? 220 : nil))
+        .frame(maxWidth: isPerformanceActive ? 300 : nil)
         .padding(.vertical, 7)
         .padding(.horizontal, isPerformanceActive ? 0 : 14)
         .padding(.leading, isPerformanceActive ? 14 : 0)
-        .padding(.trailing, isLandscape && isPerformanceActive ? 20 : 0)
         .background(.ultraThinMaterial)
         .cornerRadius(isPerformanceActive ? 12 : 16)
         .shadow(color: Color.black.opacity(0.06), radius: 2, x: 0, y: 2)
@@ -184,10 +182,10 @@ struct StatusIndicator: View {
                 )
                 .opacity(0.6)
         )
-        .fixedSize(horizontal: !isLandscape, vertical: true)
         .scaleEffect(isPressed ? 0.98 : 1.0)
         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: state)
         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isPressed)
+        .contentShape(Rectangle())
         .simultaneousGesture(
             DragGesture(minimumDistance: 0)
                 .onChanged { _ in

@@ -21,8 +21,6 @@ struct AnnotationTopMenu: View {
     
     var body: some View {
         GeometryReader { geometry in
-            let isLandscape = geometry.size.width > geometry.size.height
-            
             HStack(alignment: .top, spacing: 5) {
                 // Close/Discard button
                 AnnotationNavItem(imageName: "xmark", isPressed: $isDiscardPressed) {
@@ -42,7 +40,7 @@ struct AnnotationTopMenu: View {
                 Spacer()
                 
                 // Annotation tabs
-                AnnotationTabSelector(selectedTab: $selectedTab, isLandscape: isLandscape)
+                AnnotationTabSelector(selectedTab: $selectedTab)
                 
                 Spacer()
                 
@@ -101,6 +99,8 @@ struct AnnotationNavItem: View {
             .shadow(color: Color.black.opacity(0.06), radius: 2, x: 0, y: 2)
             .scaleEffect(isPressed ? 0.95 : 1.0)
             .animation(.spring(response: 0.2, dampingFraction: 0.6), value: isPressed)
+            .frame(width: 44, height: 44)
+            .contentShape(Rectangle())
             .simultaneousGesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { _ in
@@ -125,7 +125,6 @@ struct AnnotationNavItem: View {
 // Annotation Tab Selector (similar to StatusIndicator)
 struct AnnotationTabSelector: View {
     @Binding var selectedTab: AnnotationTopMenu.AnnotationTab
-    var isLandscape: Bool = false
     
     var body: some View {
         HStack(spacing: 0) {
@@ -169,7 +168,6 @@ struct AnnotationTabSelector: View {
                 )
                 .opacity(0.6)
         )
-        .fixedSize(horizontal: !isLandscape, vertical: true)
     }
 }
 
@@ -199,6 +197,8 @@ struct TabButton: View {
                         .padding(2)
                     : nil
                 )
+                .frame(minHeight: 44)
+                .contentShape(Rectangle())
         }
         .buttonStyle(PlainButtonStyle())
     }

@@ -5,35 +5,36 @@ struct PageNavigator: View {
     let totalPages: Int
     
     var body: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: 10) {
             // Page dots
-            HStack(spacing: 10) {
-                // Always put the large dot first
-                ZStack {
-                    Circle()
-                        .fill(Color.white)
-                        .frame(width: 22, height: 22)
-                        .shadow(color: Color.black.opacity(0.2), radius: 2, x: 0, y: 2)
-                }
-                .frame(width: 22, height: 22)
-                
-                // Then all small dots
-                ForEach(1..<totalPages, id: \.self) { _ in
+            HStack(spacing: 8) {
+                ForEach(0..<totalPages, id: \.self) { index in
+                    // Use current page index to determine styling
                     ZStack {
-                        Circle()
-                            .fill(Color.black.opacity(0.7))
-                            .frame(width: 5, height: 5)
+                        if index == currentPage {
+                            // Current page - large white dot
+                            Circle()
+                                .fill(Color.white)
+                                .frame(width: 20, height: 20)
+                                .shadow(color: Color.black.opacity(0.2), radius: 2, x: 0, y: 2)
+                        } else {
+                            // Other pages - small dark dot
+                            Circle()
+                                .fill(Color.black.opacity(0.7))
+                                .frame(width: 5, height: 5)
+                        }
                     }
-                    .frame(width: 22, height: 22) // Same frame for all dots
+                    .frame(width: 26, height: 26)
+                    .contentShape(Rectangle())
                 }
             }
             .frame(alignment: .center)
         }
-        .padding(.vertical, 5)
-        .padding(.horizontal, 5)
+        .padding(.vertical, 3)
+        .padding(.horizontal, 3)
         .background(.ultraThinMaterial)
         .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.06), radius: 2, x: 0, y: 2)
+        .shadow(color: Color.black.opacity(0.15), radius: 3, x: 0, y: 2)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
                 .stroke(

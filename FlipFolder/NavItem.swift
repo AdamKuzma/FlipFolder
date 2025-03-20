@@ -39,6 +39,7 @@ struct NavItem: View {
             .shadow(color: Color.black.opacity(0.06), radius: 2, x: 0, y: 2)
             .scaleEffect(isPressed ? 0.95 : 1.0)
             .animation(.spring(response: 0.2, dampingFraction: 0.6), value: isPressed)
+            .contentShape(Rectangle())
             .simultaneousGesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { _ in
