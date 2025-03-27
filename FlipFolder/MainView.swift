@@ -22,6 +22,7 @@ class ImageZoomManager: ObservableObject {
 // Simple image page view for displaying song sheets
 struct PageView: View {
     let pageNumber: Int
+    @Environment(\.colorScheme) private var colorScheme
     
     var body: some View {
         // Try to load image from resources
@@ -29,11 +30,11 @@ struct PageView: View {
             Image(uiImage: image)
                 .resizable()
                 .scaledToFit()
-                .background(Color.white)
+                .background(ColorTokens.surface)
         } else {
             // Fallback if image cannot be loaded
             Rectangle()
-                .fill(Color.white)
+                .fill(ColorTokens.surface)
                 .overlay(
                     Text("Page \(pageNumber) not found")
                         .foregroundColor(.gray)
@@ -42,7 +43,7 @@ struct PageView: View {
     }
     
     private func loadPageImage() -> UIImage? {
-        let imageName = "Page\(pageNumber)"
+        let imageName = colorScheme == .dark ? "Page\(pageNumber)-Dark" : "Page\(pageNumber)"
         
         // Try to load from bundle
         if let image = UIImage(named: imageName) {
@@ -118,16 +119,22 @@ struct MainView: View {
     @State private var currentZoom: CGFloat = 1.0
     @Binding var isTopMenuVisible: Bool
     @Binding var isAnnotationModeActive: Bool
+    @Binding var currentPerformanceName: String?
     @State private var showAnnotationSheet: Bool = false
     @State private var currentPage: Int = 0
     @State private var totalPages: Int = 3
     @State private var orientationChanged = false // Track orientation changes
+    @Environment(\.colorScheme) private var colorScheme
     
     // Double-tap gesture state
     @State private var lastDoubleTapLocation: CGPoint = .zero
     
     // For ScrollView position tracking
     @State private var scrollViewProxy: ScrollViewProxy? = nil
+    
+    private var emptyImageName: String {
+        colorScheme == .dark ? "Empty-Dark" : "Empty"
+    }
     
     var body: some View {
         Group {
@@ -164,14 +171,14 @@ struct MainView: View {
                                                 VStack(spacing: 8) {
                                                     Text(song.title)
                                                         .font(.custom("TiroBangla-Regular", size: 19))
-                                                        .foregroundColor(Color(hex: "#1C1B1F"))
+                                                        .foregroundColor(ColorTokens.primary)
                                                         .frame(maxWidth: .infinity)
                                                     
                                                     Text(song.composer)
                                                         .font(.custom("TiroBangla-Italic", size: 8))
                                                         .fontDesign(.serif)
                                                         .italic()
-                                                        .foregroundColor(Color(hex: "#1C1B1F"))
+                                                        .foregroundColor(ColorTokens.primary)
                                                         .kerning(-0.3)
                                                         .frame(maxWidth: .infinity, alignment: .trailing)
                                                 }
@@ -180,8 +187,8 @@ struct MainView: View {
                                                 .background(
                                                     LinearGradient(
                                                         gradient: Gradient(colors: [
-                                                            Color.white,
-                                                            Color.white.opacity(0)
+                                                            ColorTokens.surface,
+                                                            ColorTokens.surface.opacity(0)
                                                         ]),
                                                         startPoint: .top,
                                                         endPoint: .bottom
@@ -292,7 +299,7 @@ struct MainView: View {
                                 }
                             }
                     )
-                    .background(Color.white)
+                    .background(ColorTokens.surface)
                     .ignoresSafeArea(.all)
                     .onAppear {
                         // Initialize zoom from manager
@@ -363,8 +370,8 @@ struct MainView: View {
                             // Gradient background
                             LinearGradient(
                                 gradient: Gradient(colors: [
-                                    Color.white,
-                                    Color.white.opacity(0)
+                                    ColorTokens.surface,
+                                    ColorTokens.surface.opacity(0)
                                 ]),
                                 startPoint: .top,
                                 endPoint: .bottom
@@ -373,7 +380,7 @@ struct MainView: View {
                             // Progressive blur overlay
                             VStack(spacing: 0) {
                                 ForEach(0..<8) { index in
-                                    Color.white
+                                    ColorTokens.surface
                                         .opacity(0.2 - (Double(index) * 0.025))
                                         .blur(radius: 6.0 - (Double(index) * 0.6))
                                         .frame(height: 10)
@@ -398,8 +405,8 @@ struct MainView: View {
                             // Gradient background
                             LinearGradient(
                                 gradient: Gradient(colors: [
-                                    Color.white.opacity(0),
-                                    Color.white
+                                    ColorTokens.surface.opacity(0),
+                                    ColorTokens.surface
                                 ]),
                                 startPoint: .top,
                                 endPoint: .bottom
@@ -408,7 +415,7 @@ struct MainView: View {
                             // Progressive blur overlay
                             VStack(spacing: 0) {
                                 ForEach(0..<8) { index in
-                                    Color.white
+                                    ColorTokens.surface
                                         .opacity(0.025 + (Double(index) * 0.025))
                                         .blur(radius: 0.6 + (Double(index) * 0.6))
                                         .frame(height: 10)
@@ -440,23 +447,23 @@ struct MainView: View {
                 }
             } else {
                 VStack(alignment: .center, spacing: 12) {
-                    Image("Empty")
+                    Image(emptyImageName)
                         .padding(.bottom, 16)
                     
                     Text("No song selected")
                         .font(.system(size: 19, weight: .semibold))
-                        .foregroundColor(Color(red: 112/255, green: 112/255, blue: 112/255))
+                        .foregroundColor(ColorTokens.quaternary)
                         .padding(.bottom, 4)
                     
                     Text("Start a performance or select a song from the menu above to display sheet music.")
                         .font(.system(size: 16, weight: .regular))
-                        .foregroundColor(Color(red: 132/255, green: 132/255, blue: 132/255))
+                        .foregroundColor(ColorTokens.caption)
                         .multilineTextAlignment(.center)
                         .lineSpacing(3)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .padding(.horizontal, 46)
-                .background(Color.white)
+                .background(ColorTokens.surface)
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: UIDevice.orientationDidChangeNotification)) { _ in
@@ -478,13 +485,15 @@ struct MainView: View {
             selectedSong: .constant(nil), 
             isLoading: .constant(false), 
             isTopMenuVisible: .constant(true),
-            isAnnotationModeActive: .constant(false)
+            isAnnotationModeActive: .constant(false),
+            currentPerformanceName: .constant(nil)
         )
         MainView(
             selectedSong: .constant(Song(title: "Preview Song", composer: "Preview Composer")), 
             isLoading: .constant(false), 
             isTopMenuVisible: .constant(true),
-            isAnnotationModeActive: .constant(false)
+            isAnnotationModeActive: .constant(false),
+            currentPerformanceName: .constant(nil)
         )
     }
 }

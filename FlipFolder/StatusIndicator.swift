@@ -77,6 +77,7 @@ enum StatusIndicatorState: Equatable {
 struct StatusIndicator: View {
     let state: StatusIndicatorState
     @State private var isPressed = false
+    @Environment(\.colorScheme) private var colorScheme
     
     private var isPerformanceActive: Bool {
         switch state {
@@ -85,6 +86,10 @@ struct StatusIndicator: View {
         default:
             return false
         }
+    }
+    
+    private var materialOpacity: Double {
+        colorScheme == .dark ? 0.6 : 1
     }
     
     var body: some View {
@@ -131,8 +136,8 @@ struct StatusIndicator: View {
                 if let label = state.label {
                     Text(label)
                         .font(.system(size: 11, weight: .medium))
-                        .kerning(-0.2)
-                        .foregroundColor(Color(red: 132/255, green: 123/255, blue: 139/255))
+                        .kerning(-0.1)
+                        .foregroundColor(ColorTokens.light)
                         .transition(
                             .asymmetric(
                                 insertion: .move(edge: .top).combined(with: .opacity),
@@ -143,8 +148,8 @@ struct StatusIndicator: View {
                 
                 Text(state.title)
                     .font(.system(size: 13, weight: .semibold))
-                    .kerning(-0.2)
-                    .foregroundColor(Color(red: 69/255, green: 61/255, blue: 75/255))
+                    .kerning(-0.1)
+                    .foregroundColor(ColorTokens.dark)
                     .lineLimit(1)
                     .truncationMode(.tail)
                     .transition(
@@ -164,20 +169,13 @@ struct StatusIndicator: View {
         .padding(.vertical, 7)
         .padding(.horizontal, isPerformanceActive ? 0 : 14)
         .padding(.leading, isPerformanceActive ? 14 : 0)
-        .background(.ultraThinMaterial)
+        .background(.ultraThinMaterial.opacity(materialOpacity))
         .cornerRadius(isPerformanceActive ? 12 : 16)
         .shadow(color: Color.black.opacity(0.06), radius: 2, x: 0, y: 2)
         .overlay(
             RoundedRectangle(cornerRadius: isPerformanceActive ? 12 : 16)
                 .stroke(
-                    LinearGradient(
-                        gradient: Gradient(colors: [
-                            Color(.sRGB, red: 249/255, green: 248/255, blue: 250/255),
-                            Color(.sRGB, red: 211/255, green: 209/255, blue: 211/255)
-                        ]),
-                        startPoint: .top,
-                        endPoint: .bottom
-                    ),
+                    ColorTokens.containerGradient,
                     lineWidth: 1
                 )
                 .opacity(0.6)

@@ -8,7 +8,7 @@ struct MenuItemRow: View {
         Button(action: {
             // Only perform action if not disabled
             if !isDisabled {
-                item.action()
+                item.action(appState: appState)
             }
         }) {
             HStack {
@@ -48,6 +48,7 @@ struct MenuItemRow: View {
 // AppState class to share state across views
 class AppState: ObservableObject {
     @Published var selectedSong: Song?
+    @Published var showSettings = false
 }
 
 enum ToolsMenuItem: CaseIterable, Identifiable {
@@ -85,7 +86,7 @@ enum ToolsMenuItem: CaseIterable, Identifiable {
         }
     }
     
-    func action() {
+    func action(appState: AppState) {
         // Implement actions for each menu item
         switch self {
         case .annotate:
@@ -109,7 +110,7 @@ enum ToolsMenuItem: CaseIterable, Identifiable {
             // Handle messages action
             break
         case .settings:
-            // Handle settings action
+            appState.showSettings = true
             break
         }
     }

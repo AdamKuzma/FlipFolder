@@ -11,7 +11,7 @@ import CoreGraphics
 import CoreText
 
 @main
-struct FlipFolder_App: App {
+struct FlipFolderApp: App {
     init() {
         // Register fonts
         registerFonts()
@@ -60,7 +60,6 @@ struct FlipFolder_App: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .preferredColorScheme(.light)
         }
     }
 }

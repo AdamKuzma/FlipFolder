@@ -12,26 +12,29 @@ struct NavItem: View {
     @State private var isPressed = false
     @Binding var showToolsMenu: Bool
     @Binding var showSongsView: Bool
+    @Environment(\.colorScheme) private var colorScheme
+    
+    private var imageNameForScheme: String {
+        colorScheme == .dark ? "\(imageName)-Dark" : imageName
+    }
+    
+    private var materialOpacity: Double {
+        colorScheme == .dark ? 0.6 : 1
+    }
     
     var body: some View {
-        Image(imageName)
+        Image(imageNameForScheme)
             .resizable()
             .scaledToFit()
             .frame(width: 18, height: 18)
+            .foregroundStyle(ColorTokens.default)
             .padding(6)
-            .background(.ultraThinMaterial)
+            .background(.ultraThinMaterial.opacity(materialOpacity))
             .cornerRadius(8)
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
                     .stroke(
-                        LinearGradient(
-                            gradient: Gradient(colors: [
-                                Color(.sRGB, red: 249/255, green: 248/255, blue: 250/255),
-                                Color(.sRGB, red: 211/255, green: 209/255, blue: 211/255)
-                            ]),
-                            startPoint: .top,
-                            endPoint: .bottom
-                        ),
+                        ColorTokens.containerGradient,
                         lineWidth: 1
                     )
                     .opacity(0.6)

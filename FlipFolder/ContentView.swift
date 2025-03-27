@@ -20,8 +20,8 @@ struct ContentView: View {
     @State private var statusState: StatusIndicatorState = .noSong
     @State private var selectedSong: Song?
     @State private var popoverScale: CGFloat = 0
-    @State private var toolsMenuScale: CGFloat = 0
-    @State private var partsMenuScale: CGFloat = 0
+    @State private var toolsMenuScale: CGFloat = 0.6
+    @State private var partsMenuScale: CGFloat = 0.6
     @State private var isMainViewLoading = false
     @State private var previousSongId: UUID?
     @State private var showSongsView = false
@@ -35,6 +35,10 @@ struct ContentView: View {
     
     var body: some View {
         ZStack {
+            // Background color for the entire view
+            ColorTokens.surface
+                .ignoresSafeArea()
+            
             // Main content
             mainContentView
             
@@ -77,6 +81,9 @@ struct ContentView: View {
             // Update AppState when selectedSong changes
             appState.selectedSong = newSong
         }
+        .sheet(isPresented: $appState.showSettings) {
+            SettingsView()
+        }
     }
     
     // MARK: - View Components
@@ -87,7 +94,8 @@ struct ContentView: View {
                 selectedSong: $selectedSong, 
                 isLoading: $isMainViewLoading, 
                 isTopMenuVisible: $isTopMenuVisible,
-                isAnnotationModeActive: $isAnnotationModeActive
+                isAnnotationModeActive: $isAnnotationModeActive,
+                currentPerformanceName: $currentPerformanceName
             )
                 .onTapGesture {
                     // Only toggle top menu if not in annotation mode
