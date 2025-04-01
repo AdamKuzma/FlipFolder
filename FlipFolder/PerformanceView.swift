@@ -179,9 +179,9 @@ struct PerformanceView: View {
                 Button(action: {
                     dismiss()
                 }) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 19, weight: .semibold))
-                        .foregroundColor(Color(hex: "#5C5C5E"))
+                    Image(systemName: "arrow.backward")
+                        .font(.system(size: 19, weight: .medium))
+                        .foregroundColor(ColorTokens.quaternary)
                         .frame(width: 32, height: 32)
                         .cornerRadius(8)
                 }
@@ -189,9 +189,10 @@ struct PerformanceView: View {
                 Spacer()
                 
                 Text("Performance")
-                    .font(.custom("Futura", size: 22))
-                    .foregroundColor(.primary)
-                    .kerning(-0.8)
+                    .font(.system(size: 22, design: .rounded))
+                    .bold(true)
+                    .foregroundColor(ColorTokens.secondary)
+                    .kerning(-0.3)
                 Spacer()
                 
                 Menu {
@@ -208,8 +209,8 @@ struct PerformanceView: View {
                     }
                 } label: {
                     Image(systemName: "ellipsis")
-                        .font(.system(size: 22, weight: .medium))
-                        .foregroundColor(Color(hex: "#5C5C5E"))
+                        .font(.system(size: 21, weight: .medium))
+                        .foregroundColor(ColorTokens.quaternary)
                         .frame(width: 32, height: 32)
                         .cornerRadius(8)
                 }
@@ -219,42 +220,55 @@ struct PerformanceView: View {
             
             // Container for labeled values
             VStack(spacing: 12) {
-                PerformanceRow(label: "Performance", value: performanceName)
-                Divider()
-                    .opacity(0.7)
-                HStack {
-                    Text("Playing Now")
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(Color(red: 112/255, green: 112/255, blue: 112/255))
-                        .frame(maxWidth: CGFloat.infinity, alignment: .leading)
-                    
-                    Group {
-                        if isLoading {
-                            ProgressView()
-                                .scaleEffect(0.8)
-                                .frame(width: 16, height: 16)
-                                .frame(maxWidth: .infinity, alignment: .trailing)
-                        } else {
-                            HStack(spacing: 8) {
-                                Image("PlayingNow")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 16, height: 16)
-                                Text(selectedSong?.title ?? "No song playing")
-                                    .font(.system(size: 16, weight: .semibold))
-                                    .lineLimit(1)
-                                    .truncationMode(.tail)
-                            }
-                            .frame(maxWidth: .infinity, alignment: .trailing)
-                        }
-                    }
-                    .frame(maxWidth: CGFloat.infinity, alignment: .trailing)
+                VStack() {
+                    PerformanceRow(label: "Performance", value: performanceName)
                 }
+                .padding(.horizontal)
+                
                 Divider()
                     .opacity(0.7)
-                PerformanceRow(label: "Devices", value: "1", icon: "Device")
+                
+                VStack() {
+                    HStack {
+                        Text("Playing Now")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(Color(red: 112/255, green: 112/255, blue: 112/255))
+                            .frame(maxWidth: CGFloat.infinity, alignment: .leading)
+                        
+                        Group {
+                            if isLoading {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                                    .frame(width: 16, height: 16)
+                                    .frame(maxWidth: .infinity, alignment: .trailing)
+                            } else {
+                                HStack(spacing: 8) {
+                                    Image("PlayingNow")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 16, height: 16)
+                                    Text(selectedSong?.title ?? "No song playing")
+                                        .font(.system(size: 16, weight: .semibold))
+                                        .lineLimit(1)
+                                        .truncationMode(.tail)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .trailing)
+                            }
+                        }
+                        .frame(maxWidth: CGFloat.infinity, alignment: .trailing)
+                    }
+                }
+                .padding(.horizontal)
+                
+                Divider()
+                    .opacity(0.7)
+                
+                VStack() {
+                    PerformanceRow(label: "Devices", value: "1", icon: "Device")
+                }
+                .padding(.horizontal)
             }
-            .padding()
+            .padding(.vertical)
             .background(Color(.systemGray5).opacity(0.5))
             .cornerRadius(12)
             .padding(.horizontal, 25)

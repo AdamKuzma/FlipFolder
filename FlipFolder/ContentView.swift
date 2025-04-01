@@ -163,20 +163,20 @@ struct ContentView: View {
                             
                         } else {
                             Image(systemName: "plus.circle")
-                                .font(.body)
-                                .foregroundColor(.black)
+                                .font(.system(size: 17))
+                                .foregroundColor(ColorTokens.primary)
                         }
                         
                         Text(statusState.label == "Performance Active" ? currentPerformanceName ?? "" : "New Performance")
-                            .font(.body)
-                            .foregroundColor(.black)
+                            .font(.system(size: 17, weight: .regular))
+                            .foregroundColor(ColorTokens.primary)
                         
                         Spacer()
                     }
                     .frame(width: 308)
-                    .padding(.vertical, 20)
-                    .padding(.horizontal, 22)
-                    .background(Color.white.opacity(0.9))
+                    .padding(.vertical, 16)
+                    .padding(.horizontal, 20)
+                    .background(.regularMaterial)
                     .cornerRadius(12)
                     .offset(y: statusState.label == "Performance Active" ? 72 : 64)
                     .scaleEffect(popoverScale)
