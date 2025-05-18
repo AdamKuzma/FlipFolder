@@ -12,6 +12,8 @@ import CoreText
 
 @main
 struct FlipFolderApp: App {
+    @State private var isOnboardingCompleted = UserDefaults.standard.bool(forKey: "isOnboardingCompleted")
+    
     init() {
         // Register fonts
         registerFonts()
@@ -59,7 +61,16 @@ struct FlipFolderApp: App {
     
     var body: some Scene {
         WindowGroup {
+            if isOnboardingCompleted {
             ContentView()
+            } else {
+                OnboardingView(isOnboardingCompleted: $isOnboardingCompleted)
+                    .onChange(of: isOnboardingCompleted) { newValue in
+                        if newValue {
+                            UserDefaults.standard.set(true, forKey: "isOnboardingCompleted")
+                        }
+                    }
+            }
         }
     }
 }

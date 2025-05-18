@@ -20,7 +20,7 @@ enum ColorTokens {
     static let dark = Color(light: "453D4B", dark: "EDECEE")
     
     // MARK: - Background Colors
-    static let surface = Color(light: "FFFFFF", dark: "101013")
+    static let surface = Color(light: "FFFFFF", dark: "0E0F10")
     static let sheet = Color(light: "FFFFFF", dark: "1C1C1E")
     static let backgroundSecondary = Color(light: "F2F2F5", dark: "1B1B1F")
     static let performance = Color(light: "F2F2F5", dark: "2C2C2E")

@@ -166,7 +166,7 @@ struct MainView: View {
                                         .id("top")
                                         
                                         VStack(spacing: 0) {
-                                            // Title section
+                                            //Title section
                                             if let song = selectedSong {
                                                 VStack(spacing: 8) {
                                                     Text(song.title)
@@ -228,6 +228,7 @@ struct MainView: View {
                                             }
                                             .padding(.horizontal, 20)
                                             .padding(.bottom, 60)
+                                            // .padding(.top, 40) // Remove this if you show the title section
                                         }
                                     }
                                 }

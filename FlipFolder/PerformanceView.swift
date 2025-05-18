@@ -221,7 +221,7 @@ struct PerformanceView: View {
             // Container for labeled values
             VStack(spacing: 12) {
                 VStack() {
-                    PerformanceRow(label: "Performance", value: performanceName)
+                PerformanceRow(label: "Performance", value: performanceName)
                 }
                 .padding(.horizontal)
                 
@@ -229,34 +229,34 @@ struct PerformanceView: View {
                     .opacity(0.7)
                 
                 VStack() {
-                    HStack {
-                        Text("Playing Now")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(Color(red: 112/255, green: 112/255, blue: 112/255))
-                            .frame(maxWidth: CGFloat.infinity, alignment: .leading)
-                        
-                        Group {
-                            if isLoading {
-                                ProgressView()
-                                    .scaleEffect(0.8)
-                                    .frame(width: 16, height: 16)
-                                    .frame(maxWidth: .infinity, alignment: .trailing)
-                            } else {
-                                HStack(spacing: 8) {
-                                    Image("PlayingNow")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 16, height: 16)
-                                    Text(selectedSong?.title ?? "No song playing")
-                                        .font(.system(size: 16, weight: .semibold))
-                                        .lineLimit(1)
-                                        .truncationMode(.tail)
-                                }
+                HStack {
+                    Text("Playing Now")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(Color(red: 112/255, green: 112/255, blue: 112/255))
+                        .frame(maxWidth: CGFloat.infinity, alignment: .leading)
+                    
+                    Group {
+                        if isLoading {
+                            ProgressView()
+                                .scaleEffect(0.8)
+                                .frame(width: 16, height: 16)
                                 .frame(maxWidth: .infinity, alignment: .trailing)
+                        } else {
+                            HStack(spacing: 8) {
+                                Image("PlayingNow")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 16, height: 16)
+                                Text(selectedSong?.title ?? "No song playing")
+                                    .font(.system(size: 16, weight: .semibold))
+                                    .lineLimit(1)
+                                    .truncationMode(.tail)
                             }
+                            .frame(maxWidth: .infinity, alignment: .trailing)
                         }
-                        .frame(maxWidth: CGFloat.infinity, alignment: .trailing)
                     }
+                    .frame(maxWidth: CGFloat.infinity, alignment: .trailing)
+                }
                 }
                 .padding(.horizontal)
                 
@@ -264,7 +264,7 @@ struct PerformanceView: View {
                     .opacity(0.7)
                 
                 VStack() {
-                    PerformanceRow(label: "Devices", value: "1", icon: "Device")
+                PerformanceRow(label: "Devices", value: "1", icon: "Device")
                 }
                 .padding(.horizontal)
             }

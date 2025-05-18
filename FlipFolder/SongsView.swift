@@ -146,7 +146,7 @@ struct SongsHeader: View {
                     showSongsView = false
                 }
             }) {
-                Image(systemName: "chevron.left")
+                Image(systemName: "arrow.left")
                     .font(.system(size: 19, weight: .semibold))
                     .foregroundColor(Color(hex: "#5C5C5E"))
                     .frame(width: 32, height: 32)
@@ -160,7 +160,7 @@ struct SongsHeader: View {
                 Text("Playlists").tag(1)
             }
             .pickerStyle(.segmented)
-            .frame(width: 200)
+            .frame(width: 230)
             
             Spacer()
             
@@ -176,12 +176,14 @@ struct SongsTitle: View {
     var body: some View {
         HStack {
             Text("Songs")
-                .font(.custom("Futura", size: 22))
-                .foregroundColor(.primary)
-                .kerning(-0.8)
+                .font(.system(size: 22, design: .rounded))
+                .bold(true)
+                .foregroundColor(ColorTokens.secondary)
+                .kerning(-0.3)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.horizontal, 25)
+        .padding(.bottom, -4)
     }
 }
 
@@ -222,7 +224,7 @@ struct SongsList: View {
                     EmptySearchState()
                 }
             }
-            .padding(.horizontal, 25)
+            .padding(.horizontal, 16)
         }
     }
 }
@@ -238,6 +240,7 @@ struct SongGroupView: View {
             Text(group.letter)
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundColor(Color(red: 112/255, green: 112/255, blue: 112/255))
+                .padding(.horizontal, 8)
             
             VStack(spacing: 0) {
                 ForEach(group.songs) { song in
@@ -247,10 +250,13 @@ struct SongGroupView: View {
                         songToConfirm: $songToConfirm,
                         showingSongConfirmation: $showingSongConfirmation
                     )
+                    .cornerRadius(12)
                     
                     if song.id != group.songs.last?.id {
                         Divider()
+                        .padding(.horizontal, 8)
                     }
+            
                 }
             }
             .cornerRadius(12)
@@ -263,31 +269,71 @@ struct SongRow: View {
     let isSelected: Bool
     @Binding var songToConfirm: Song?
     @Binding var showingSongConfirmation: Bool
+    @State private var showingAddToPlaylist = false
+    @State private var showingDeleteConfirmation = false
     
     var body: some View {
         Button(action: {
             songToConfirm = song
             showingSongConfirmation = true
         }) {
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(song.title)
-                        .font(.system(size: 15, weight: .medium))
-                        .foregroundColor(ColorTokens.label)
-                    Text(song.composer)
-                        .font(.system(size: 13))
-                        .foregroundColor(Color(red: 112/255, green: 112/255, blue: 112/255))
+            ZStack {
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(Color(.systemBackground))
+                    .shadow(color: .black.opacity(0.03), radius: 1, x: 0, y: 1)
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(song.title)
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundColor(ColorTokens.label)
+                        Text(song.composer)
+                            .font(.system(size: 13))
+                            .foregroundColor(Color(red: 112/255, green: 112/255, blue: 112/255))
+                    }
+                    Spacer()
+                    if isSelected {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(Color(hex: "#6B4EFF"))
+                            .font(.system(size: 20))
+                    }
                 }
-                
-                Spacer()
-                
-                if isSelected {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(Color(hex: "#6B4EFF"))
-                        .font(.system(size: 20))
-                }
+                .padding(8)
             }
-            .padding(.vertical, 8)
+        }
+        .buttonStyle(.plain)
+        .contentShape(.contextMenuPreview, RoundedRectangle(cornerRadius: 12))
+        .contextMenu {
+            Button(action: {
+                songToConfirm = song
+                showingSongConfirmation = true
+            }) {
+                Label("Play song", systemImage: "play")
+            }
+            Button(action: {
+                showingAddToPlaylist = true
+            }) {
+                Label("Add to playlist", systemImage: "plus.circle")
+            }
+            Button(role: .destructive, action: {
+                showingDeleteConfirmation = true
+            }) {
+                Label("Delete", systemImage: "trash")
+            }
+        }
+        .confirmationDialog(
+            "Are you sure you want to delete \"\(song.title)\"?",
+            isPresented: $showingDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive) {
+                // TODO: Implement delete functionality
+            }
+            Button("Cancel", role: .cancel) {}
+        }
+        .sheet(isPresented: $showingAddToPlaylist) {
+            // TODO: Implement Add to Playlist sheet
+            Text("Add to Playlist")
+                .presentationDetents([.medium])
         }
     }
 }
@@ -331,7 +377,7 @@ struct SearchBar: View {
     var body: some View {
         HStack {
             Image(systemName: "magnifyingglass")
-                .foregroundColor(ColorTokens.caption.opacity(0.6))
+                .foregroundColor(ColorTokens.caption.opacity(0.7))
             
             TextField("Search songs", text: $text)
                 .foregroundColor(.primary)
@@ -350,7 +396,7 @@ struct SearchBar: View {
                 }
             }
         }
-        .padding(10)
+        .padding(8)
         .background(Color(ColorTokens.backgroundSecondary))
         .cornerRadius(10)
     }
